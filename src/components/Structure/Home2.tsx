@@ -54,7 +54,6 @@ const Home = ({ vitalId }: { vitalId: any }) => {
   }, []);
 
   useEffect(() => {
-    console.log("Vital Data", vitalData);
     const heartRateData: any = vitalData.filter(
       (item: any) => item.label === vitals[vitalId]
     )[0];

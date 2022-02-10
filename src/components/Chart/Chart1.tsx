@@ -199,14 +199,6 @@ const Charts = ({
         const end = values.length - leftOffset;
         const start = Math.max(0, end - length);
 
-        console.log(
-          "New Frame",
-          leftOffset,
-          values.length,
-          start,
-          end,
-          end - start
-        );
         setDataFrame([
           {
             name: title,
@@ -222,9 +214,7 @@ const Charts = ({
   }, [isLive]);
 
   useEffect(() => {
-    console.log("Static Datax", data2);
     if (!!target && target.current) {
-      console.log("Container", target.current.offsetHeight);
       // setHeight(target.current.offsetHeight - 10);
       setWidth(target.current.offsetWidth);
     }
@@ -232,8 +222,6 @@ const Charts = ({
 
   useLayoutEffect(() => {
     if (!!target && target.current) {
-      console.log("Container", target.current.offsetHeight);
-      // setHeight(target.current.offsetHeight - 50);
       setWidth(target.current.offsetWidth);
     }
   }, []);
@@ -241,15 +229,10 @@ const Charts = ({
   useEffect(() => {
     if (zoomIn) {
       const interval = setInterval(() => {
-        console.log("Zooming In");
         clearInterval(interval);
       }, 1000);
     }
   }, [zoomIn]);
-
-  useEffect(() => {
-    console.log("Zoom Level", zoomLevel);
-  }, [zoomLevel]);
 
   useGesture(
     {
@@ -260,24 +243,19 @@ const Charts = ({
         }
       },
       onDrag: ({ event, offset: [x], direction: [dx] }: any) => {
+        console.log("Drag", x);
+        setLeftOffset(x);
         event.preventDefault();
         if (dx) {
-          console.log("Drag", dx);
           if (dx) {
             if (dx < 0) handleMoveRightLinear();
             if (dx > 0) handleMoveLeftLinear();
           }
         }
       },
-      onWheelStart: ({ direction: [dx, dy] }) => {
-        setLive(false);
-        if (dx) {
-          console.log("Wheel X : Start");
-        }
-      },
-      onWheelEnd: ({ direction: [dx, dy] }) => {
-        setLive(true);
-        console.log("Wheel : End");
+      onPinch: ({ offset: [d] }) => {
+        setZoomLevel(d);
+        // console.log("Pinch ", d);
       },
       onWheel: ({ event, direction: [dx, dy], movement: [x, y] }: any) => {
         event.preventDefault();
@@ -299,6 +277,8 @@ const Charts = ({
       eventOptions: {
         passive: false,
       },
+      pinch: { scaleBounds: { min: MIN_ZOOM_LEVEL, max: MAX_ZOOM_LEVEL } },
+      // drag: { bounds: { left: values.length, right: 0 } },
     }
   );
 
@@ -377,8 +357,6 @@ const Charts = ({
                 className={`chart-navigation-button ${
                   leftScroll > 0 ? "is-active" : ""
                 } ${values.length - leftOffset < zoomLevel ? "disabled" : ""}`}
-                // onMouseDown={handleLeftStart}
-                onMouseUp={handleLeftStop}
                 onClick={handleMoveLeft}
               >
                 <FiChevronsLeft />
