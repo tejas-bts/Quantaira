@@ -441,6 +441,19 @@
   padding: 0.1rem;
 }
 
+.zoom-buttons button.disabled,
+.chart-navigation-button.disabled {
+  color: #777;
+  border: 2px solid #777;
+  cursor: not-allowed;
+}
+
+.zoom-buttons button.disabled:active,
+.chart-navigation-button.disabled:active {
+  border: 2px solid #777;
+  background: transparent;
+}
+
 @media only screen and (max-width: 1300px) {
   .zoom-buttons button {
     height: 2rem;
@@ -479,6 +492,7 @@
   line-height: 0.7rem;
   color: white;
   padding-top: 0.2rem;
+  text-align: right;
 }
 
 .font-weight-bold {

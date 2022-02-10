@@ -10,6 +10,7 @@ import Home from "./components/Structure/Home2";
 ReactDOM.render(
   <React.StrictMode>
     <App />
+    {/* <Home vitalId={2} /> */}
   </React.StrictMode>,
   document.getElementById("root")
 );

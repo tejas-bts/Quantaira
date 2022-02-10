@@ -27,29 +27,16 @@ const colors = [
 
 const Home = ({ vitalId }: { vitalId: any }) => {
   const [buffer, setBuffer] = useState<any>([]);
-  const [bufferList, setBufferList] = useState<any>([
-    {
-      name: "heart-rate",
-      data: [],
-    },
-  ]);
+  const [bufferList, setBufferList] = useState<any>([]);
   const [vitalData, setVitals] = useState([]);
   const [heartRateData, setHeartRateData] = useState<any>();
 
   useEffect(() => {
-    setBufferList(() => [
-      {
-        name: "heart-rate",
-        data: buffer,
-      },
-    ]);
+    setBufferList(() => [...buffer]);
   }, [buffer]);
 
   useEffect(() => {
-    const socket = Client("http://192.168.1.221:3000");
-    // const socket = Client(
-    //   "http://dev-websocketdatageneus.azurewebsites.net:3000"
-    // );
+    const socket = Client("http://40.76.196.190:3001"); // Client("http://192.168.1.221:3000"); //
     socket.on("connect", () => {
       console.log(socket.id);
       console.log(socket.connected); // true
@@ -70,7 +57,6 @@ const Home = ({ vitalId }: { vitalId: any }) => {
     const heartRateData: any = vitalData.filter(
       (item: any) => item.label === vitals[vitalId]
     )[0];
-    console.log("Filtered Array", vitalId, heartRateData);
     setHeartRateData(heartRateData);
     const heartRateSeries = heartRateData ? heartRateData.values : [];
     let timeOutArray: NodeJS.Timeout[] = [];

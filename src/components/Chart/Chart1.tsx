@@ -12,6 +12,8 @@ import { useGesture } from "@use-gesture/react";
 import data2 from "./DummyData";
 
 const ADDING_DATA_INTERVAL_IN_SECONDS = 1000;
+const MAX_ZOOM_LEVEL = 200;
+const MIN_ZOOM_LEVEL = 4;
 const CHART_BACKGROUND_COLOR = "#02162c";
 const MAX_CHART_LENGTH = 40;
 
@@ -155,31 +157,65 @@ const Charts = ({
     });
   };
 
+  const handleMoveLeft = () => {
+    if (values.length - leftOffset < zoomLevel) return;
+    setLeftOffset((offset: any) =>
+      Math.min(Math.ceil(1.1 * (offset || 1)), values.length)
+    );
+  };
+
+  const handleMoveRight = () => {
+    setLeftOffset((offset: any) => Math.max(Math.floor(0.9 * offset), 0));
+  };
+
+  const handleMoveLeftLinear = () => {
+    if (values.length - leftOffset < zoomLevel) return;
+    setLeftOffset((offset: any) => Math.min(1 + offset, values.length));
+  };
+
+  const handleMoveRightLinear = () => {
+    setLeftOffset((offset: any) => Math.max(offset - 1, 0));
+  };
+
   const handleZoomOut = () => {
-    setZoomLevel((zoomLevel) => zoomLevel + zoomStep);
+    if (zoomLevel < MAX_ZOOM_LEVEL)
+      setZoomLevel((zoomLevel) => zoomLevel + zoomStep);
+    console.log("Zoom Level", zoomLevel);
   };
 
   useEffect(() => {
-    if (values.length && values[0].data) {
-      let data: any = values[0].data;
-      if (data.length) {
-        setCurrentValue(data[data.length - 1][1]);
+    if (values.length) {
+      /*
+       *     Variable "values" holds the data coming from props
+       *     We take a sliding window out of "values" into "dataFrame" and pass it to chart.
+       *     The length of sliding window depends on the zoomLevel and length of "values" array.
+       *     We adjust the "start" and "end" of sliding window depending on leftOffset, which is updated by navigation buttons.
+       */
 
-        const length = 100; // 1 Hour of data
+      if (values.length) {
+        setCurrentValue(values[values.length - 1][1]);
 
-        const end = Math.max(length, data.length - leftOffset);
+        const length = 200; //Math.max(zoomLevel, 20); // 1 Hour of data
+        const end = values.length - leftOffset;
         const start = Math.max(0, end - length);
 
-        console.log("New Frame", start, end, leftOffset, data.length);
+        console.log(
+          "New Frame",
+          leftOffset,
+          values.length,
+          start,
+          end,
+          end - start
+        );
         setDataFrame([
           {
-            ...values[0],
-            data: data.slice(start - leftOffset, end - leftOffset),
+            name: title,
+            data: values.slice(start, end),
           },
         ]);
       }
     }
-  }, [values, leftOffset]);
+  }, [values, leftOffset, zoomLevel]);
 
   useEffect(() => {
     Data.isLive = isLive;
@@ -211,6 +247,10 @@ const Charts = ({
     }
   }, [zoomIn]);
 
+  useEffect(() => {
+    console.log("Zoom Level", zoomLevel);
+  }, [zoomLevel]);
+
   useGesture(
     {
       onScroll: ({ event, offset: [x], direction: [dx] }: any) => {
@@ -224,32 +264,28 @@ const Charts = ({
       onDrag: ({ event, offset: [x], direction: [dx] }: any) => {
         event.preventDefault();
         if (dx) {
-          console.log("Drag");
+          console.log("Drag", dx);
+          if (dx) {
+            if (dx < 0) handleMoveRightLinear();
+            if (dx > 0) handleMoveLeftLinear();
+          }
           // dragOffset.current = -x;
           // runSprings(wheelOffset.current + -x, -dx);
         }
       },
       // onPinch: ({ offset: [scale] }: any) => {
 
-      onPinch: ({
-        event: any,
-        offset: [prevX],
-        lastOffset: [curX],
-        cancel,
-        offset,
-      }) => {
-        const newChange = (prevX - curX) / 100;
-        const newZoomLevel = parseInt(`${zoomLevel + newChange}`);
-
-        if (newZoomLevel > 5 && newZoomLevel < 100) {
-          console.log("Pinch State", newZoomLevel);
-          setZoomLevel(newZoomLevel);
-        } else if (newZoomLevel >= 100) {
-          setZoomLevel(99);
-        } else if (newZoomLevel <= 5) {
-          setZoomLevel(5);
-        }
-        console.log("New Zoom level", newZoomLevel, prevX, curX);
+      onPinch: ({ direction }) => {
+        // if (direction[0] > 0) {
+        //   handleZoomIn();
+        // } else {
+        //   handleZoomOut();
+        // }
+        // if (direction[1] > 0) {
+        //   handleZoomIn();
+        // } else {
+        //   handleZoomOut();
+        // }
       },
       onWheelStart: ({ direction: [dx, dy] }) => {
         setLive(false);
@@ -271,12 +307,16 @@ const Charts = ({
       }: any) => {
         event.preventDefault();
         if (dy) {
-          const newZoomLevel = parseInt(`${zoomLevel + y / 100}`);
-          if (newZoomLevel > 5 && newZoomLevel < 100)
-            setZoomLevel(newZoomLevel);
+          console.log("Zoom Change", dy);
+          if (dy < 0) {
+            handleZoomIn();
+          } else {
+            handleZoomOut();
+          }
         }
         if (dx) {
-          console.log("Wheel X", x - prevX, active);
+          if (dx > 0) handleMoveRight();
+          if (dx < 0) handleMoveLeft();
         }
       },
     },
@@ -312,7 +352,9 @@ const Charts = ({
             <div className="chart-header-col-1">
               <div className="zoom-buttons">
                 <button
-                  className={`mt-2 ${zoomIn ? "is-active" : ""}`}
+                  className={`mt-2 ${zoomIn ? "is-active" : ""} ${
+                    zoomLevel <= MIN_ZOOM_LEVEL ? "disabled" : ""
+                  }`}
                   onClick={handleZoomIn}
                   onMouseDown={() => setZoomIn(true)}
                   onMouseUp={() => setZoomIn(false)}
@@ -320,7 +362,9 @@ const Charts = ({
                   <FiZoomIn />
                 </button>
                 <button
-                  className={`mt-0 ${zoomOut ? "is-active" : ""}`}
+                  className={`mt-0 ${zoomOut ? "is-active" : ""} ${
+                    zoomLevel >= MAX_ZOOM_LEVEL ? "disabled" : ""
+                  }`}
                   onClick={handleZoomOut}
                   onMouseDown={() => setZoomOut(true)}
                   onMouseUp={() => setZoomOut(false)}
@@ -359,31 +403,20 @@ const Charts = ({
               <button
                 className={`chart-navigation-button ${
                   leftScroll > 0 ? "is-active" : ""
-                }`}
+                } ${values.length - leftOffset < zoomLevel ? "disabled" : ""}`}
                 // onMouseDown={handleLeftStart}
                 onMouseUp={handleLeftStop}
-                onClick={() => {
-                  console.log("Clicked", leftOffset);
-                  console.log(leftOffset);
-                  setLeftOffset((offset: any) =>
-                    Math.max(Math.ceil(1.1 * offset), values.length)
-                  );
-                }}
+                onClick={handleMoveLeft}
               >
                 <FiChevronsLeft />
               </button>
               <button
                 className={`chart-navigation-button ${
                   rightScroll > 0 ? "is-active" : ""
-                }`}
+                } ${leftOffset == 0 ? "disabled" : ""}`}
                 onMouseDown={handleRightStart}
                 onMouseUp={handleRightStop}
-                onClick={() => {
-                  console.log("Clicked", leftOffset);
-                  setLeftOffset((offset: any) =>
-                    Math.max(Math.ceil(0.909 * offset), values.length)
-                  );
-                }}
+                onClick={handleMoveRight}
               >
                 <FiChevronsRight />
               </button>
