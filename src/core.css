@@ -78,14 +78,15 @@
   }
   .edit_icon {
     position: absolute;
-    top: 46%;
-    left: 62%;
+    top: 15px;
     transform: translate(-18%, -42%);
     background-color: #0e86f9;
     padding: 0px 4px 3px 6px;
     border-radius: 50%;
     color: #fff;
     font-size: 13px;
+    right: -45px;
+    left: unset;
   }
   .tabs__wrapper li:after {
     content: "\203A";

@@ -34,7 +34,7 @@ const Charts = ({
   values,
 }: any) => {
   const [isLive, setLive] = useState(true);
-  const [chartHeight, setHeight] = useState<any>(180);
+  const [chartHeight, setHeight] = useState<any>(200);
   const [chartWidth, setWidth] = useState<any>(0);
 
   const [leftScroll, setLeftScroll] = useState(0);
@@ -253,12 +253,10 @@ const Charts = ({
 
   useGesture(
     {
-      onScroll: ({ event, offset: [x], direction: [dx] }: any) => {
+      onScroll: ({ event, offset: [x], direction: [dx, dy] }: any) => {
         event.preventDefault();
-        if (dx) {
-          console.log("Scroll");
-          // dragOffset.current = -x;
-          // runSprings(wheelOffset.current + -x, -dx);
+        if (dx || dy) {
+          console.log("Scroll", dx, dy);
         }
       },
       onDrag: ({ event, offset: [x], direction: [dx] }: any) => {
@@ -269,23 +267,7 @@ const Charts = ({
             if (dx < 0) handleMoveRightLinear();
             if (dx > 0) handleMoveLeftLinear();
           }
-          // dragOffset.current = -x;
-          // runSprings(wheelOffset.current + -x, -dx);
         }
-      },
-      // onPinch: ({ offset: [scale] }: any) => {
-
-      onPinch: ({ direction }) => {
-        // if (direction[0] > 0) {
-        //   handleZoomIn();
-        // } else {
-        //   handleZoomOut();
-        // }
-        // if (direction[1] > 0) {
-        //   handleZoomIn();
-        // } else {
-        //   handleZoomOut();
-        // }
       },
       onWheelStart: ({ direction: [dx, dy] }) => {
         setLive(false);
@@ -297,17 +279,9 @@ const Charts = ({
         setLive(true);
         console.log("Wheel : End");
       },
-      onWheel: ({
-        event,
-        lastOffset: [prevX, prevY],
-        // offset: [x, y],
-        direction: [dx, dy],
-        active,
-        movement: [x, y],
-      }: any) => {
+      onWheel: ({ event, direction: [dx, dy], movement: [x, y] }: any) => {
         event.preventDefault();
         if (dy) {
-          console.log("Zoom Change", dy);
           if (dy < 0) {
             handleZoomIn();
           } else {
@@ -324,7 +298,6 @@ const Charts = ({
       target,
       eventOptions: {
         passive: false,
-        bounds: { left: -100, right: 100, top: -50, bottom: 50 },
       },
     }
   );

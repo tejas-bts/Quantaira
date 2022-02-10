@@ -36,7 +36,8 @@ const Home = ({ vitalId }: { vitalId: any }) => {
   }, [buffer]);
 
   useEffect(() => {
-    const socket = Client("http://40.76.196.190:3001"); // Client("http://192.168.1.221:3000"); //
+    const socket = Client("http://40.76.196.190:3001");
+    // const socket = Client("http://192.168.1.221:3000");
     socket.on("connect", () => {
       console.log(socket.id);
       console.log(socket.connected); // true
