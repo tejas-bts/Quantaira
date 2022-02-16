@@ -560,3 +560,12 @@
   justify-content: center;
   align-items: center;
 }
+
+.go-live-button {
+  background-color: transparent;
+  border: none;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

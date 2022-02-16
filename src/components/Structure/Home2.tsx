@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Charts from "../Chart/Chart1";
-import { GiLungs, GiHeartOrgan, GiMedicalThermometer } from "react-icons/gi";
 import { io as Client } from "socket.io-client";
+import { GiLungs, GiHeartOrgan, GiMedicalThermometer } from "react-icons/gi";
 import { FaNotesMedical } from "react-icons/fa";
 import { BiPulse } from "react-icons/bi";
 

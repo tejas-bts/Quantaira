@@ -14,6 +14,7 @@ import { CgSelectO } from "react-icons/cg";
 import { BsFillHeartFill } from "react-icons/bs";
 import { GrPrevious } from "react-icons/gr";
 import { FiTrash2 } from "react-icons/fi";
+import { removeListener } from "process";
 
 const initialChartOPtions = ["HR", "SpO2", "IBP", "Temp", "NIBP", "ECG", "CO2"];
 const getVitalId = (item: any) => {
@@ -32,6 +33,17 @@ function App() {
   const [chartOptions, setChartOptions] = useState(initialChartOPtions);
   const [displayedCharts, setDisplayedCharts] = useState<any>([]);
   const chartSelectorRef = useRef(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const audio = new Audio("asset/sounds/beep.mp3");
+      audio.play();
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
     console.log("Chart Selections", displayedCharts);

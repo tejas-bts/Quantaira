@@ -37,12 +37,15 @@ const Charts = ({
   const [chartHeight, setHeight] = useState<any>(200);
   const [chartWidth, setWidth] = useState<any>(0);
 
+  const [chartColor, setChartColor] = useState(color);
+
   const [leftScroll, setLeftScroll] = useState(0);
   const [rightScroll, setRightScroll] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(10);
   const [leftOffset, setLeftOffset] = useState(0);
   const [zoomIn, setZoomIn] = useState(false);
   const [zoomOut, setZoomOut] = useState(false);
+  const [alarm, setAlarm] = useState(false);
 
   const [currentValue, setCurrentValue] = useState(0);
   const [dataFrame, setDataFrame] = useState<Array<any>>([]);
@@ -88,9 +91,15 @@ const Charts = ({
     dataLabels: {
       enabled: false,
     },
-    stroke: { curve: "straight", colors: [color] },
+    stroke: {
+      // curve: "straight",
+      colors: [chartColor],
+      show: true,
+      curve: "smooth",
+      lineCap: "square",
+    },
     fill: {
-      colors: color,
+      colors: chartColor,
       type: "gradient",
       gradient: {
         shadeIntensity: 1,
@@ -234,6 +243,41 @@ const Charts = ({
     }
   }, [zoomIn]);
 
+  useEffect(() => {
+    let interval: NodeJS.Timer;
+    if (alarm) {
+      const audio = new Audio("asset/sounds/alarm.mp3");
+      audio.play();
+      audio.addEventListener("ended", () => {
+        clearInterval(interval);
+        setAlarm(false);
+        setChartColor(color);
+      });
+      interval = setInterval(() => {
+        setChartColor("red");
+      }, 1000);
+      return () => {
+        audio.removeEventListener("ended", () => {
+          clearInterval(interval);
+          setAlarm(false);
+          setChartColor(color);
+        });
+      };
+    } else {
+      setChartColor(color);
+    }
+  }, [alarm]);
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (chartColor !== color && alarm) {
+      timeout = setTimeout(() => setChartColor(color), 500);
+    }
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [chartColor]);
+
   useGesture(
     {
       onScroll: ({ event, offset: [x], direction: [dx, dy] }: any) => {
@@ -296,7 +340,11 @@ const Charts = ({
       <div className="chart-header">
         <div className="chart-header-left">
           <div>
-            <div className="chart-title" style={{ color }}>
+            <div
+              className="chart-title"
+              style={{ color: chartColor }}
+              onClick={() => setAlarm(true)}
+            >
               <Icon className="chart-icon" />
               <span>{title}</span>
             </div>
@@ -327,7 +375,10 @@ const Charts = ({
               </div>
             </div>
             <div className="chart-header-col-2">
-              <div className="chart-current-value" style={{ color }}>
+              <div
+                className="chart-current-value"
+                style={{ color: chartColor }}
+              >
                 {currentValue}
               </div>
             </div>
@@ -335,7 +386,7 @@ const Charts = ({
               <div className="chart-ideal-value">
                 <p className="m-0 font-weight-bold">{idealMax}</p>
                 <p className="mb-1 font-weight-bold">{idealMin}</p>
-                <p className="m-0" style={{ color }}>
+                <p className="m-0" style={{ color: chartColor }}>
                   {unit}
                 </p>
               </div>
@@ -345,8 +396,22 @@ const Charts = ({
         <div className="chart-header-center">
           <div className="chart-header-col-4">
             <div className="chart-online-status delayed">
-              <FiClock color="yellow" className="m-1" />
-              Delayed
+              {leftOffset > 5 ? (
+                <>
+                  <button
+                    className="go-live-button"
+                    onClick={() => setLeftOffset(0)}
+                  >
+                    <FiClock color="yellow" className="m-1" />
+                    <span>Go Live</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <FiClock color="green" className="m-1 mr-2" />
+                  <span className="ml-2">Live</span>
+                </>
+              )}
             </div>
           </div>
         </div>
