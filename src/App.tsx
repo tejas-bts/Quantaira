@@ -15,6 +15,7 @@ import { BsFillHeartFill } from "react-icons/bs";
 import { GrPrevious } from "react-icons/gr";
 import { FiTrash2 } from "react-icons/fi";
 import { removeListener } from "process";
+import SelectDevice from "./components/HospitalSelector";
 
 const initialChartOPtions = ["HR", "SpO2", "IBP", "Temp", "NIBP", "ECG", "CO2"];
 const getVitalId = (item: any) => {
@@ -31,6 +32,7 @@ let replaceIndex = 0;
 function App() {
   const [graphList, setGraphList] = useState([]);
   const [chartOptions, setChartOptions] = useState(initialChartOPtions);
+  const [patientSelected, setPatientSelected] = useState(false);
   const [displayedCharts, setDisplayedCharts] = useState<any>([]);
   const chartSelectorRef = useRef(null);
 
@@ -106,39 +108,47 @@ function App() {
             <div className="col-6 text-center graph__container2">
               <div className="col-12 d-flex justify-content-center align-items-center">
                 <div className="row">
-                  <div className="col-12">
-                    <select
-                      name=""
-                      id="graph"
-                      className="select__option mb-2"
-                      onChange={addChart}
-                      ref={chartSelectorRef}
-                      defaultValue="select"
-                    >
-                      <option value="select" disabled>
-                        Select Patient Report
-                      </option>
-                      {chartOptions.map((item, index) => (
-                        <option value={item} key={index}>
-                          {item}
+                  {!patientSelected ? (
+                    <SelectDevice
+                      onSelected={() => {
+                        setPatientSelected(true);
+                      }}
+                    />
+                  ) : (
+                    <div className="col-12">
+                      <select
+                        name=""
+                        id="graph"
+                        className="select__option mb-2"
+                        onChange={addChart}
+                        ref={chartSelectorRef}
+                        defaultValue="select"
+                      >
+                        <option value="select" disabled>
+                          Select Patient Report
                         </option>
-                      ))}
-                    </select>
-                    <div className="d-flex">
-                      {displayedCharts.map((item: any, index: any) => (
-                        <div className="button_pill m-1" key={index}>
-                          {item}
-                          <button
-                            className="btn_pill_remove"
-                            onClick={() => removeGraph(item)}
-                            value={item}
-                          >
-                            <FiTrash2 />
-                          </button>
-                        </div>
-                      ))}
+                        {chartOptions.map((item, index) => (
+                          <option value={item} key={index}>
+                            {item}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="d-flex">
+                        {displayedCharts.map((item: any, index: any) => (
+                          <div className="button_pill m-1" key={index}>
+                            {item}
+                            <button
+                              className="btn_pill_remove"
+                              onClick={() => removeGraph(item)}
+                              value={item}
+                            >
+                              <FiTrash2 />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>

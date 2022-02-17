@@ -1,4 +1,7 @@
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,200;0,600;1,300&display=swap");
+
 body {
+  background-color: #07203c;
   margin: 0;
   font-family: "Barlow", sans-serif;
   font-family: "Barlow Condensed", sans-serif;
@@ -15,4 +18,15 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
+}
+.border-sky {
+  border: 2px solid #0e86f9;
+
+  color: #fff;
+}
+
+.border-transperant {
+  border: 2px solid transparent;
+
+  color: #cfcfcf;
 }

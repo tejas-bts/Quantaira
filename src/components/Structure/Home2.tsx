@@ -5,7 +5,7 @@ import { GiLungs, GiHeartOrgan, GiMedicalThermometer } from "react-icons/gi";
 import { FaNotesMedical } from "react-icons/fa";
 import { BiPulse } from "react-icons/bi";
 
-const vitals = ["HR", "SpO2", "IBP", "Temp", "NIBP", "ECG", "CO2"];
+const vitals = ["HR", "SpO2", "IBP", "Temp", "NIBP", "ECG", "CO2", "RR"];
 const icons = [
   GiHeartOrgan,
   GiLungs,
@@ -36,12 +36,15 @@ const Home = ({ vitalId }: { vitalId: any }) => {
   }, [buffer]);
 
   useEffect(() => {
-    const socket = Client("http://40.76.196.190:3001");
-    // const socket = Client("http://192.168.1.221:3000");
+    // const socket = Client("http://40.76.196.190:3001");
+    const socket = Client("http://192.168.1.29:3001");
     socket.on("connect", () => {
       console.log(socket.id);
       console.log(socket.connected); // true
-      socket.on("bed007", ({ pid, bed, data }) => setVitals(data));
+      socket.on("bed007", ({ pid, bed, data }) => {
+        console.log("Data", data);
+        setVitals(data);
+      });
     });
 
     socket.on("disconnect", (km) => {

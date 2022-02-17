@@ -72,7 +72,14 @@ const ButtonContainer = ({ graphList }: any) => {
             </div>
             <span className="button__text">Setting</span>
           </div>
-          <div className="col-1 button__group flex-column text-center">
+          <div
+            className="col-1 button__group flex-column text-center"
+            onClick={() => {
+              localStorage.removeItem("loggedIn");
+              window.location.reload();
+              console.log("Log Out");
+            }}
+          >
             <div className="icon__size">
               <FiLogOut />
             </div>
